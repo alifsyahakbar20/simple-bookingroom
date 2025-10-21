@@ -19,11 +19,11 @@ export default function AdminLoginPage() {
 
     return (
         <div className="flex min-h-screen bg-white">
-            <div className="hidden md:flex w-3/5 items-center justify-center bg-gray-100 relative">
-                <Image src="/images/bg-login-admin.jpg" alt="" fill className="object-cover rounded-r-2xl" />
+            <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-100 relative">
+                <Image src="/images/bg-login-admin.jpg" alt="" fill className="object-cover" />
             </div>
 
-            <div className="flex w-full md:w-2/5 items-center justify-center px-2 py-12">
+            <div className="flex w-full md:w-1/2 items-center justify-center px-2 py-12">
                 <div className="w-full max-w-md">
                     <div className='mb-8 flex justify-center md:justify-start w-full'>
                         <Link href="/" className=''>
