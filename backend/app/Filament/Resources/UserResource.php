@@ -3,18 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -23,12 +16,9 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Manajemen Pengguna';
-    }
+    protected static ?int $navigationSort = 98;
 
     public static function form(Form $form): Form
     {
@@ -41,21 +31,15 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('password')
-                    ->required(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord)
-                    ->dehydrated(fn($state) => filled($state))
-                    ->password()
-                    ->revealable(),
-                Select::make('roles')
+                Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name')
+                    ->multiple()
                     ->preload()
-                    ->label('Hak Akses')
-                    ->options(function () {
-                        return \Spatie\Permission\Models\Role::all()->pluck('name', 'id');
-                    }),
-                Toggle::make('is_active')
-                    ->label('Status User?')
-                    ->inline(false),
+                    ->searchable(),
+                Forms\Components\TextInput::make('password')
+                    ->password()
+                    ->required()
+                    ->maxLength(255),
             ]);
     }
 
@@ -63,13 +47,25 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('email'),
-                IconColumn::make('email_verified_at')
-                    ->boolean(),
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->sortable(),
+                // Tables\Columns\TextColumn::make('email_verified_at')
+                //     ->dateTime()
+                //     ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -77,6 +73,8 @@ class UserResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -95,5 +93,23 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('resources/user.label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament-shield::filament-shield.nav.group') ?? 'User Management';
     }
 }

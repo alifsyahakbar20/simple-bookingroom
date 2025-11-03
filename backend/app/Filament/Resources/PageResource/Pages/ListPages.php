@@ -16,14 +16,4 @@ class ListPages extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
-
-    public function getTitle(): string
-    {
-        return 'Halaman';
-    }
-
-    public function getBreadcrumb(): string
-    {
-        return 'Halaman';
-    }
 }

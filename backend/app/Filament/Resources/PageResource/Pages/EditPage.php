@@ -14,6 +14,20 @@ class EditPage extends EditRecord
     {
         return [
             Actions\DeleteAction::make(),
+            Actions\ForceDeleteAction::make(),
+            Actions\RestoreAction::make(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if ($data['is_published'] && empty($data['published_at'])) {
+            $data['published_at'] = now();
+        }
+        if (! $data['is_published']) {
+            $data['published_at'] = null;
+        }
+
+        return $data;
     }
 }

@@ -4,6 +4,19 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/layouts/Header';
 
+
+interface Hotel {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  description: string;
+  rating: string;
+  image: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -30,14 +43,35 @@ function App() {
         'Collaborate, socialize, and grow with like-minded professionals.',
     },
   ];
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Auto slide effect
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [slides.length]);
+    const fetchHotels = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/hotels");
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data hotel");
+        }
+        const data: Hotel[] = await response.json();
+        setHotels(data);
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHotels();
+  }, []);
+
+  if (loading) {
+    return <p className="text-center text-gray-500">Memuat data...</p>;
+  }
+
+  if (hotels.length === 0) {
+    return <p className="text-center text-gray-500">Tidak ada data hotel</p>;
+  }
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
@@ -168,21 +202,34 @@ function App() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {hotels.map((hotel) => (
               <div
-                key={i}
+                key={hotel.id}
                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden"
               >
                 <img
-                  src={`https://picsum.photos/seed/hotel${i}/400/250`}
-                  alt={`Hotel ${i}`}
+                  src={
+                    hotel.image
+                      ? hotel.image
+                      : `https://picsum.photos/seed/hotel${hotel.id}/400/250`
+                  }
+                  alt={hotel.name}
                   className="w-full h-52 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Hotel Santika {i}</h3>
-                  <p className="text-gray-500 text-sm mt-1">Jakarta, Indonesia</p>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {hotel.name}
+                  </h3>
+                  <p className="text-gray-500 text-sm mt-1">
+                    {hotel.city}, Indonesia
+                  </p>
+                  <p className="text-gray-600 text-sm mt-2 line-clamp-2">
+                    {hotel.description}
+                  </p>
                   <div className="flex items-center justify-between mt-3">
-                    <span className="text-blue-600 font-bold text-lg">Rp {400000 + i * 50000}</span>
+                    <span className="text-blue-600 font-bold text-lg">
+                      ⭐ {hotel.rating}
+                    </span>
                     <button className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                       Lihat Detail
                     </button>
