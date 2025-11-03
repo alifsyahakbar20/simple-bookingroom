@@ -65,14 +65,6 @@ function App() {
     fetchHotels();
   }, []);
 
-  if (loading) {
-    return <p className="text-center text-gray-500">Memuat data...</p>;
-  }
-
-  if (hotels.length === 0) {
-    return <p className="text-center text-gray-500">Tidak ada data hotel</p>;
-  }
-
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
       <Header />

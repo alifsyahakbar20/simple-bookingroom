@@ -28,7 +28,7 @@ export default function Button(
     };
 
     return (
-        <button onClick={onClick} className={`text-white rounded-lg focus:none transition duration-200 ease-in-out ${colorButton[color]} ${className} ${sizeButton[size]}`}>
+        <button onClick={onClick} className={`text-white rounded-lg focus:none transition duration-200 ease-in-out cursor-pointer ${colorButton[color]} ${className} ${sizeButton[size]}`}>
             {label}
         </button>
     );
